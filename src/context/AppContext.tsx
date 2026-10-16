@@ -77,8 +77,6 @@ interface AppState {
   admin: AdminProfile;
   notifications: Notification[];
   darkMode: boolean;
-  language: 'pt-AO' | 'pt-PT' | 'en';
-  sidebarOpen: boolean;
   currentPage: string;
 }
 
@@ -110,12 +108,12 @@ interface AppContextType extends AppState {
   updateAdmin: (admin: Partial<AdminProfile>) => void;
   // UI
   toggleDarkMode: () => void;
-  setLanguage: (lang: 'pt-AO' | 'pt-PT' | 'en') => void;
-  toggleSidebar: () => void;
   setCurrentPage: (page: string) => void;
   // Notifications
   addNotification: (msg: string, type: Notification['type']) => void;
   removeNotification: (id: string) => void;
+  // Data
+  resetAllData: () => void;
 }
 
 const defaultDepartments: Department[] = [
@@ -211,8 +209,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [admin, setAdmin] = useState<AdminProfile>(() => loadState('admin', { name: 'Administrador', role: 'Admin', institution: 'Empresa S.A.' }));
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [darkMode, setDarkMode] = useState<boolean>(() => loadState('darkMode', false));
-  const [language, setLanguage] = useState<'pt-AO' | 'pt-PT' | 'en'>(() => loadState('language', 'pt-AO'));
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentPage, setCurrentPage] = useState('dashboard');
 
   // Persist state
@@ -224,7 +220,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { saveState('alerts', alerts); }, [alerts]);
   useEffect(() => { saveState('admin', admin); }, [admin]);
   useEffect(() => { saveState('darkMode', darkMode); }, [darkMode]);
-  useEffect(() => { saveState('language', language); }, [language]);
 
   // Auto-remove notifications after 4s
   useEffect(() => {
@@ -261,25 +256,39 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const updateAdmin = (data: Partial<AdminProfile>) => setAdmin(prev => ({ ...prev, ...data }));
   const toggleDarkMode = () => setDarkMode(prev => !prev);
-  const toggleSidebar = () => setSidebarOpen(prev => !prev);
 
   const addNotification = (message: string, type: Notification['type']) => {
     setNotifications(prev => [...prev, { id: generateId(), message, type, timestamp: Date.now() }]);
   };
   const removeNotification = (id: string) => setNotifications(prev => prev.filter(n => n.id !== id));
 
+  // Reset all data to defaults
+  const resetAllData = () => {
+    setDepartments(defaultDepartments);
+    setPositions(defaultPositions);
+    setEmployees(defaultEmployees);
+    setAbsenceTypes(defaultAbsenceTypes);
+    setAbsences(defaultAbsences);
+    setAlerts(defaultAlerts);
+    setAdmin({ name: 'Administrador', role: 'Admin', institution: 'Empresa S.A.' });
+    setNotifications([]);
+    setDarkMode(false);
+    setCurrentPage('dashboard');
+  };
+
   return (
     <AppContext.Provider value={{
       departments, positions, employees, absenceTypes, absences, alerts, admin, notifications,
-      darkMode, language, sidebarOpen, currentPage,
+      darkMode, currentPage,
       addDepartment, updateDepartment, deleteDepartment,
       addPosition, updatePosition, deletePosition,
       addEmployee, updateEmployee, deleteEmployee,
       addAbsenceType, updateAbsenceType, deleteAbsenceType,
       addAbsence, updateAbsence, deleteAbsence,
       resolveAlert, dismissAllAlerts,
-      updateAdmin, toggleDarkMode, setLanguage, toggleSidebar, setCurrentPage,
+      updateAdmin, toggleDarkMode, setCurrentPage,
       addNotification, removeNotification,
+      resetAllData,
     }}>
       {children}
     </AppContext.Provider>

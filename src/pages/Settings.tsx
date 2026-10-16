@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Save, Plus, Edit2, Trash2, Palette } from 'lucide-react';
+import { Save, Plus, Edit2, Trash2, RotateCcw } from 'lucide-react';
 import Modal from '../components/Modal';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function Settings() {
-  const { admin, updateAdmin, departments, positions, addDepartment, updateDepartment, deleteDepartment, addPosition, updatePosition, deletePosition, darkMode, addNotification } = useApp();
+  const { admin, updateAdmin, departments, positions, addDepartment, updateDepartment, deleteDepartment, addPosition, updatePosition, deletePosition, darkMode, addNotification, resetAllData } = useApp();
 
   const [adminForm, setAdminForm] = useState({ name: admin.name, role: admin.role, institution: admin.institution });
   const [showDeptModal, setShowDeptModal] = useState(false);
@@ -13,6 +14,8 @@ export default function Settings() {
   const [editingPos, setEditingPos] = useState<string | null>(null);
   const [deptForm, setDeptForm] = useState({ name: '', color: '#10b981' });
   const [posForm, setPosForm] = useState({ title: '', departmentId: departments[0]?.id || '' });
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string; type: 'dept' | 'pos' }>({ open: false, id: '', name: '', type: 'dept' });
+  const [resetConfirm, setResetConfirm] = useState(false);
 
   const handleSaveAdmin = () => {
     updateAdmin(adminForm);
@@ -73,9 +76,45 @@ export default function Settings() {
     setShowPosModal(false);
   };
 
+  // Delete confirmation
+  const handleDeleteDept = (id: string, name: string) => {
+    setDeleteConfirm({ open: true, id, name, type: 'dept' });
+  };
+
+  const handleDeletePos = (id: string, title: string) => {
+    setDeleteConfirm({ open: true, id, name: title, type: 'pos' });
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirm.type === 'dept') {
+      deleteDepartment(deleteConfirm.id);
+      addNotification('Departamento removido', 'info');
+    } else {
+      deletePosition(deleteConfirm.id);
+      addNotification('Cargo removido', 'info');
+    }
+  };
+
+  // Reset app data
+  const handleReset = () => {
+    resetAllData();
+    addNotification('Dados repostos com sucesso', 'success');
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn">
-      <h2 className="text-lg font-bold">Configurações</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-bold">Configurações</h2>
+        <button
+          onClick={() => setResetConfirm(true)}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm border transition-colors ${
+            darkMode ? 'border-gray-700 hover:bg-gray-700 text-gray-300' : 'border-gray-200 hover:bg-gray-50 text-gray-700'
+          }`}
+        >
+          <RotateCcw className="w-4 h-4" />
+          Repor Dados de Exemplo
+        </button>
+      </div>
 
       {/* Admin Profile */}
       <div className={`rounded-xl p-5 border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -116,7 +155,7 @@ export default function Settings() {
               </div>
               <div className="flex gap-1">
                 <button onClick={() => openEditDept(dept.id)} className={`p-1.5 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}><Edit2 className="w-3.5 h-3.5" /></button>
-                <button onClick={() => { deleteDepartment(dept.id); addNotification('Departamento removido', 'info'); }} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                <button onClick={() => handleDeleteDept(dept.id, dept.name)} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
               </div>
             </div>
           ))}
@@ -142,7 +181,7 @@ export default function Settings() {
                 </div>
                 <div className="flex gap-1">
                   <button onClick={() => openEditPos(pos.id)} className={`p-1.5 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}><Edit2 className="w-3.5 h-3.5" /></button>
-                  <button onClick={() => { deletePosition(pos.id); addNotification('Cargo removido', 'info'); }} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => handleDeletePos(pos.id, pos.title)} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
                 </div>
               </div>
             );
@@ -190,6 +229,28 @@ export default function Settings() {
           </div>
         </div>
       </Modal>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.open}
+        onClose={() => setDeleteConfirm({ open: false, id: '', name: '', type: 'dept' })}
+        onConfirm={confirmDelete}
+        title={`Eliminar ${deleteConfirm.type === 'dept' ? 'Departamento' : 'Cargo'}`}
+        message={`Tem a certeza que deseja eliminar "${deleteConfirm.name}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Eliminar"
+        variant="danger"
+      />
+
+      {/* Reset Confirmation */}
+      <ConfirmDialog
+        isOpen={resetConfirm}
+        onClose={() => setResetConfirm(false)}
+        onConfirm={handleReset}
+        title="Repor Dados de Exemplo"
+        message="Tem a certeza que deseja repor todos os dados do sistema para os valores de exemplo? Todos os dados atuais serão perdidos."
+        confirmLabel="Repor Dados"
+        variant="warning"
+      />
     </div>
   );
 }

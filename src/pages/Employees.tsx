@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useApp, Employee } from '../context/AppContext';
 import { Plus, Edit2, Trash2, Upload, Download, Grid, List, X, Search, FileText, Share2, Copy } from 'lucide-react';
 import Modal from '../components/Modal';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { generateTemplate, parseExcelFile, EmployeeImportData } from '../utils/excel';
 import { exportTablePDF } from '../utils/pdf';
 import { shareWhatsApp, copyToClipboard } from '../utils/whatsapp';
@@ -17,6 +18,7 @@ export default function Employees() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [importData, setImportData] = useState<EmployeeImportData[]>([]);
   const [importMode, setImportMode] = useState<'merge' | 'replace'>('merge');
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
 
   // Form state
   const [form, setForm] = useState({ name: '', departmentId: '', positionId: '', email: '', phone: '', hireDate: '', contractEnd: '' });
@@ -56,8 +58,12 @@ export default function Employees() {
     setShowModal(false);
   };
 
-  const handleDelete = (id: string) => {
-    deleteEmployee(id);
+  const handleDelete = (id: string, name: string) => {
+    setDeleteConfirm({ open: true, id, name });
+  };
+
+  const confirmDelete = () => {
+    deleteEmployee(deleteConfirm.id);
     addNotification('Colaborador removido', 'info');
   };
 
@@ -198,7 +204,7 @@ export default function Employees() {
                     <button onClick={() => openEditModal(emp)} className={`p-1.5 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
-                    <button onClick={() => handleDelete(emp.id)} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500">
+                    <button onClick={() => handleDelete(emp.id, emp.name)} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500">
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
@@ -263,7 +269,7 @@ export default function Employees() {
                           <button onClick={() => openEditModal(emp)} className={`p-1.5 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}>
                             <Edit2 className="w-3.5 h-3.5" />
                           </button>
-                          <button onClick={() => handleDelete(emp.id)} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500">
+                          <button onClick={() => handleDelete(emp.id, emp.name)} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500">
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
@@ -320,6 +326,17 @@ export default function Employees() {
           </div>
         </div>
       </Modal>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.open}
+        onClose={() => setDeleteConfirm({ open: false, id: '', name: '' })}
+        onConfirm={confirmDelete}
+        title="Eliminar Colaborador"
+        message={`Tem a certeza que deseja eliminar o colaborador "${deleteConfirm.name}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Eliminar"
+        variant="danger"
+      />
 
       {/* Import Modal */}
       <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title="Importar Colaboradores" size="lg">

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useApp, Absence } from '../context/AppContext';
 import { Plus, Edit2, Trash2, Check, X as XIcon, FileText, Share2, Copy, Calendar } from 'lucide-react';
 import Modal from '../components/Modal';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { exportTablePDF } from '../utils/pdf';
 import { shareWhatsApp, copyToClipboard } from '../utils/whatsapp';
 
@@ -15,6 +16,7 @@ export default function Absences() {
   const [editingType, setEditingType] = useState<string | null>(null);
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; label: string }>({ open: false, id: '', label: '' });
 
   const filtered = useMemo(() => {
     return absences.filter(a => {
@@ -61,8 +63,12 @@ export default function Absences() {
     addNotification('Ausência rejeitada', 'info');
   };
 
-  const handleDelete = (id: string) => {
-    deleteAbsence(id);
+  const handleDelete = (id: string, label: string) => {
+    setDeleteConfirm({ open: true, id, label });
+  };
+
+  const confirmDelete = () => {
+    deleteAbsence(deleteConfirm.id);
     addNotification('Ausência removida', 'info');
   };
 
@@ -213,7 +219,7 @@ export default function Absences() {
                           </>
                         )}
                         <button onClick={() => openEditModal(abs)} className={`p-1.5 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}><Edit2 className="w-3.5 h-3.5" /></button>
-                        <button onClick={() => handleDelete(abs.id)} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
+                        <button onClick={() => handleDelete(abs.id, `${employees.find(e => e.id === abs.employeeId)?.name} - ${absenceTypes.find(t => t.id === abs.typeId)?.name}`)} className="p-1.5 rounded-lg hover:bg-red-100 text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
                       </div>
                     </td>
                   </tr>
@@ -262,6 +268,17 @@ export default function Absences() {
           </div>
         </div>
       </Modal>
+
+      {/* Delete Confirmation */}
+      <ConfirmDialog
+        isOpen={deleteConfirm.open}
+        onClose={() => setDeleteConfirm({ open: false, id: '', label: '' })}
+        onConfirm={confirmDelete}
+        title="Eliminar Ausência"
+        message={`Tem a certeza que deseja eliminar o registo "${deleteConfirm.label}"? Esta ação não pode ser desfeita.`}
+        confirmLabel="Eliminar"
+        variant="danger"
+      />
 
       {/* Absence Type Modal */}
       <Modal isOpen={showTypeModal} onClose={() => setShowTypeModal(false)} title="Gerir Tipos de Ausência" size="lg">
