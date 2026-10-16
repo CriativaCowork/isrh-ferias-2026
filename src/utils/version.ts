@@ -9,6 +9,47 @@ export interface VersionEntry {
 
 export const VERSION_HISTORY: VersionEntry[] = [
   {
+    version: '1.2.1',
+    date: '16 Outubro 2026',
+    features: [
+      'Menu lateral com 3 estados: expandido, recolhido e fechado',
+      'Expansão automática do menu por hover quando recolhido',
+      'Recolha automática ao retirar o cursor do menu',
+      'Admin movido do rodapé do menu para o header (canto superior direito)',
+      'Dropdown do perfil do admin com atalhos para Configurações e Versão',
+      'Remoção do switch multilíngue — sistema agora apenas em Português',
+      'Botão "Repor Dados de Exemplo" nas Configurações',
+      'Popup de confirmação ao eliminar colaboradores',
+      'Popup de confirmação ao eliminar ausências',
+      'Popup de confirmação ao eliminar departamentos',
+      'Popup de confirmação ao eliminar cargos',
+      'Componente ConfirmDialog reutilizável com variantes (danger/warning/info)',
+      'Correção do alinhamento dos ícones no menu recolhido',
+      'Remoção da scrollbar do menu lateral em todos os browsers',
+    ],
+    pages: [
+      'Layout (componente principal)',
+      'Configurações (adicionado botão de reset)',
+    ],
+    css: [
+      'Layout: Menu lateral com 3 estados e transições suaves',
+      'Layout: Header com perfil do admin e dropdown',
+      'Layout: Scrollbar oculta no sidebar (cross-browser)',
+      'Layout: Alinhamento centrado dos ícones no menu recolhido',
+      'Layout: Expansão automática por hover com delay anti-flickering',
+      'Configurações: Botão de reset com ícone e confirmação',
+      'ConfirmDialog: Componente reutilizável com 3 variantes visuais',
+    ],
+    notes: [
+      'Menu recolhido: ícones perfeitamente centrados (w-full no container interno)',
+      'Menu expandido por hover: transição suave com delay de 150ms',
+      'Admin no header: avatar com gradiente + dropdown com informações completas',
+      'Idioma único: Português (remoção de PT-AO, PT-PT e EN)',
+      'Confirmações: todas as eliminações agora exigem confirmação explícita',
+      'Reset de dados: repõe todos os dados para valores de exemplo',
+    ],
+  },
+  {
     version: '1.2.0',
     date: '16 Outubro 2026',
     features: [
