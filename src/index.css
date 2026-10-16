@@ -79,6 +79,24 @@
   -webkit-backdrop-filter: blur(12px);
 }
 
+/* Hide scrollbar on sidebar (all browsers) */
+aside {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+aside::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Hide scrollbar on sidebar nav */
+aside nav {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+aside nav::-webkit-scrollbar {
+  display: none;
+}
+
 /* Print styles */
 @media print {
   .no-print {
