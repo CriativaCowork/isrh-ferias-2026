@@ -3,11 +3,12 @@ import { useApp, Absence } from '../context/AppContext';
 import { Plus, Edit2, Trash2, Check, X as XIcon, FileText, Share2, Copy, Calendar } from 'lucide-react';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import PdfHeaderConfig from '../components/PdfHeaderConfig';
 import { exportTablePDF } from '../utils/pdf';
 import { shareWhatsApp, copyToClipboard } from '../utils/whatsapp';
 
 export default function Absences() {
-  const { absences, absenceTypes, employees, departments, addAbsence, updateAbsence, deleteAbsence, addAbsenceType, updateAbsenceType, deleteAbsenceType, darkMode, addNotification } = useApp();
+  const { absences, absenceTypes, employees, departments, addAbsence, updateAbsence, deleteAbsence, addAbsenceType, updateAbsenceType, deleteAbsenceType, darkMode, addNotification, admin, organization, pdfDefaults } = useApp();
   const [showModal, setShowModal] = useState(false);
   const [showTypeModal, setShowTypeModal] = useState(false);
   const [editingAbsence, setEditingAbsence] = useState<Absence | null>(null);
@@ -17,6 +18,8 @@ export default function Absences() {
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; label: string }>({ open: false, id: '', label: '' });
+  const [localHeader, setLocalHeader] = useState('');
+  const [localSubtitle, setLocalSubtitle] = useState('');
 
   const filtered = useMemo(() => {
     return absences.filter(a => {
@@ -82,7 +85,16 @@ export default function Absences() {
       a.status === 'approved' ? 'Aprovado' : a.status === 'rejected' ? 'Rejeitado' : 'Pendente',
       a.notes || '',
     ]);
-    exportTablePDF('Relatório de Ausências', headers, rows);
+    
+    const header = localHeader || pdfDefaults.header || 'Relatório de Ausências';
+    const subtitle = localSubtitle || pdfDefaults.subtitle || '';
+    
+    exportTablePDF(header, headers, rows, {
+      subtitle: subtitle,
+      adminName: admin.name,
+      orgName: organization.name,
+      orgNif: organization.nif,
+    });
     addNotification('PDF exportado', 'success');
   };
 
@@ -161,6 +173,12 @@ export default function Absences() {
           <button onClick={openAddModal} className="flex items-center gap-1.5 px-3 py-2 bg-emerald-500 text-white rounded-lg text-sm hover:bg-emerald-600">
             <Plus className="w-4 h-4" /> Registar
           </button>
+          <PdfHeaderConfig
+            localHeader={localHeader}
+            localSubtitle={localSubtitle}
+            onHeaderChange={setLocalHeader}
+            onSubtitleChange={setLocalSubtitle}
+          />
           <button onClick={handleExportPDF} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}><FileText className="w-4 h-4" /></button>
           <button onClick={handleShareWhatsApp} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}><Share2 className="w-4 h-4" /></button>
           <button onClick={handleCopyClipboard} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}><Copy className="w-4 h-4" /></button>

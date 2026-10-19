@@ -1,11 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { AlertTriangle, AlertCircle, Info, Download, Share2, Copy, CheckCircle, Calculator } from 'lucide-react';
 import { exportTablePDF } from '../utils/pdf';
 import { shareWhatsApp, copyToClipboard } from '../utils/whatsapp';
+import PdfHeaderConfig from '../components/PdfHeaderConfig';
 
 export default function Compliance() {
-  const { alerts, employees, absences, absenceTypes, departments, resolveAlert, darkMode, addNotification, admin } = useApp();
+  const { alerts, employees, absences, absenceTypes, departments, resolveAlert, darkMode, addNotification, admin, organization, pdfDefaults } = useApp();
+  const [localHeader, setLocalHeader] = useState('');
+  const [localSubtitle, setLocalSubtitle] = useState('');
 
   const unresolvedAlerts = alerts.filter(a => !a.resolved);
 
@@ -50,7 +53,16 @@ export default function Compliance() {
       a.date,
       a.resolved ? 'Resolvido' : 'Ativo',
     ]);
-    exportTablePDF('Relatório de Conformidade Legal', headers, rows, { adminName: admin.name });
+    
+    const header = localHeader || pdfDefaults.header || 'Relatório de Conformidade Legal';
+    const subtitle = localSubtitle || pdfDefaults.subtitle || 'Lei 12/23 — Angola';
+    
+    exportTablePDF(header, headers, rows, {
+      subtitle: subtitle,
+      adminName: admin.name,
+      orgName: organization.name,
+      orgNif: organization.nif,
+    });
     addNotification('PDF de conformidade exportado', 'success');
   };
 
@@ -96,6 +108,12 @@ export default function Compliance() {
           <p className="text-sm opacity-60">Lei Geral do Trabalho de Angola</p>
         </div>
         <div className="flex items-center gap-2">
+          <PdfHeaderConfig
+            localHeader={localHeader}
+            localSubtitle={localSubtitle}
+            onHeaderChange={setLocalHeader}
+            onSubtitleChange={setLocalSubtitle}
+          />
           <button onClick={handleExportPDF} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}><Download className="w-4 h-4" /></button>
           <button onClick={handleShareWhatsApp} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}><Share2 className="w-4 h-4" /></button>
           <button onClick={handleCopyClipboard} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`}><Copy className="w-4 h-4" /></button>

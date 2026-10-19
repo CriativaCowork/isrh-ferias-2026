@@ -3,13 +3,14 @@ import { useApp, Employee } from '../context/AppContext';
 import { Plus, Edit2, Trash2, Upload, Download, Grid, List, X, Search, FileText, Share2, Copy } from 'lucide-react';
 import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
+import PdfHeaderConfig from '../components/PdfHeaderConfig';
 import { generateTemplate, parseExcelFile, EmployeeImportData } from '../utils/excel';
 import { exportTablePDF } from '../utils/pdf';
 import { shareWhatsApp, copyToClipboard } from '../utils/whatsapp';
 import { getDepartmentColor } from '../utils/colors';
 
 export default function Employees() {
-  const { employees, departments, positions, addEmployee, updateEmployee, deleteEmployee, darkMode, addNotification } = useApp();
+  const { employees, departments, positions, addEmployee, updateEmployee, deleteEmployee, darkMode, addNotification, admin, organization, pdfDefaults } = useApp();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [search, setSearch] = useState('');
   const [filterDept, setFilterDept] = useState('all');
@@ -19,6 +20,8 @@ export default function Employees() {
   const [importData, setImportData] = useState<EmployeeImportData[]>([]);
   const [importMode, setImportMode] = useState<'merge' | 'replace'>('merge');
   const [deleteConfirm, setDeleteConfirm] = useState<{ open: boolean; id: string; name: string }>({ open: false, id: '', name: '' });
+  const [localHeader, setLocalHeader] = useState('');
+  const [localSubtitle, setLocalSubtitle] = useState('');
 
   // Form state
   const [form, setForm] = useState({ name: '', departmentId: '', positionId: '', email: '', phone: '', hireDate: '', contractEnd: '' });
@@ -114,7 +117,16 @@ export default function Employees() {
       emp.phone,
       emp.hireDate,
     ]);
-    exportTablePDF('Colaboradores', headers, rows);
+    
+    const header = localHeader || pdfDefaults.header || 'Lista de Colaboradores';
+    const subtitle = localSubtitle || pdfDefaults.subtitle || '';
+    
+    exportTablePDF(header, headers, rows, {
+      subtitle: subtitle,
+      adminName: admin.name,
+      orgName: organization.name,
+      orgNif: organization.nif,
+    });
     addNotification('PDF exportado', 'success');
   };
 
@@ -170,6 +182,12 @@ export default function Employees() {
           <button onClick={generateTemplate} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`} title="Descarregar modelo">
             <Download className="w-4 h-4" />
           </button>
+          <PdfHeaderConfig
+            localHeader={localHeader}
+            localSubtitle={localSubtitle}
+            onHeaderChange={setLocalHeader}
+            onSubtitleChange={setLocalSubtitle}
+          />
           <button onClick={handleExportPDF} className={`p-2 rounded-lg ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}`} title="Exportar PDF">
             <FileText className="w-4 h-4" />
           </button>
