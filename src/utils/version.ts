@@ -9,6 +9,49 @@ export interface VersionEntry {
 
 export const VERSION_HISTORY: VersionEntry[] = [
   {
+    version: '1.3.0',
+    date: '16 Outubro 2026',
+    features: [
+      'Paginação em todos os PDFs gerados (Página X de Y)',
+      'Nome e NIF da organização no rodapé dos PDFs',
+      'Cabeçalho e subtítulo personalizáveis por página',
+      'Cabeçalho e subtítulo padrão configuráveis nas Configurações',
+      'Componente PdfHeaderConfig reutilizável para personalização rápida',
+      'Coluna de ordem numérica no PDF do Mapa de Férias',
+      'Filtros de ordenação no Mapa de Férias: alfabética, por departamento, departamento exclusivo',
+      'Exportação do Mapa de Férias em Excel (xlsx) com filtros',
+      'Responsividade melhorada no Mapa de Férias para tablets e mobiles',
+      'Colunas fixas (Nº e Nome) com z-index adequado no Mapa de Férias',
+    ],
+    pages: [
+      'Mapa de Férias (filtros, Excel, responsividade, coluna numérica)',
+      'Configurações (dados da organização, cabeçalho padrão PDF)',
+      'Dashboard (cabeçalho personalizável)',
+      'Colaboradores (cabeçalho personalizável)',
+      'Ausências (cabeçalho personalizável)',
+      'Conformidade (cabeçalho personalizável)',
+    ],
+    css: [
+      'Mapa de Férias: Colunas fixas com z-index (Nº e Nome)',
+      'Mapa de Férias: Responsividade para tablets e mobiles',
+      'Mapa de Férias: Filtros de ordenação e departamento exclusivo',
+      'Configurações: Secção de dados da organização',
+      'Configurações: Secção de cabeçalho padrão dos PDFs',
+      'PdfHeaderConfig: Componente reutilizável com modal',
+      'PDFs: Paginação com numeração de páginas',
+      'PDFs: Rodapé com nome e NIF da organização',
+    ],
+    notes: [
+      'Paginação: todos os PDFs agora mostram "Página X de Y"',
+      'Organização: nome e NIF aparecem no rodapé quando definidos',
+      'Cabeçalhos: personalizáveis por página ou padrão global',
+      'Mapa de Férias: coluna numérica para ordenação visual',
+      'Filtros: ordenação alfabética, por departamento (agrupado), departamento exclusivo',
+      'Excel: exportação com todos os filtros aplicados',
+      'Responsividade: colunas fixas não são ocultadas pelo menu em ecrãs pequenos',
+    ],
+  },
+  {
     version: '1.2.1',
     date: '16 Outubro 2026',
     features: [

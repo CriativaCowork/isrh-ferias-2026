@@ -5,7 +5,7 @@ import Modal from '../components/Modal';
 import ConfirmDialog from '../components/ConfirmDialog';
 
 export default function Settings() {
-  const { admin, updateAdmin, departments, positions, addDepartment, updateDepartment, deleteDepartment, addPosition, updatePosition, deletePosition, darkMode, addNotification, resetAllData } = useApp();
+  const { admin, updateAdmin, organization, updateOrganization, pdfDefaults, updatePDFDefaults, departments, positions, addDepartment, updateDepartment, deleteDepartment, addPosition, updatePosition, deletePosition, darkMode, addNotification, resetAllData } = useApp();
 
   const [adminForm, setAdminForm] = useState({ name: admin.name, role: admin.role, institution: admin.institution });
   const [showDeptModal, setShowDeptModal] = useState(false);
@@ -136,6 +136,62 @@ export default function Settings() {
         <button onClick={handleSaveAdmin} className="mt-4 flex items-center gap-2 px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm hover:bg-emerald-600">
           <Save className="w-4 h-4" /> Guardar
         </button>
+      </div>
+
+      {/* Organization Info */}
+      <div className={`rounded-xl p-5 border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <h3 className="font-semibold mb-4">Dados da Organização</h3>
+        <p className="text-xs opacity-60 mb-4">Estes dados aparecerão no rodapé dos PDFs gerados</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-medium mb-1">Nome da Organização</label>
+            <input
+              type="text"
+              value={organization.name}
+              onChange={e => updateOrganization({ name: e.target.value })}
+              placeholder="Ex: Empresa S.A."
+              className={`w-full px-3 py-2 rounded-lg border text-sm ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}`}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1">NIF</label>
+            <input
+              type="text"
+              value={organization.nif}
+              onChange={e => updateOrganization({ nif: e.target.value })}
+              placeholder="Ex: 5417000000"
+              className={`w-full px-3 py-2 rounded-lg border text-sm ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}`}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* PDF Defaults */}
+      <div className={`rounded-xl p-5 border ${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+        <h3 className="font-semibold mb-4">Cabeçalho Padrão dos PDFs</h3>
+        <p className="text-xs opacity-60 mb-4">Estes valores serão usados em todos os PDFs gerados, a menos que sejam personalizados na página específica</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-medium mb-1">Cabeçalho padrão</label>
+            <input
+              type="text"
+              value={pdfDefaults.header}
+              onChange={e => updatePDFDefaults({ header: e.target.value })}
+              placeholder="Ex: Mapa de Férias"
+              className={`w-full px-3 py-2 rounded-lg border text-sm ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}`}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1">Subtítulo padrão</label>
+            <input
+              type="text"
+              value={pdfDefaults.subtitle}
+              onChange={e => updatePDFDefaults({ subtitle: e.target.value })}
+              placeholder={`Ex: Ano ${new Date().getFullYear()}`}
+              className={`w-full px-3 py-2 rounded-lg border text-sm ${darkMode ? 'bg-gray-700 border-gray-600' : 'bg-white border-gray-200'}`}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Departments */}

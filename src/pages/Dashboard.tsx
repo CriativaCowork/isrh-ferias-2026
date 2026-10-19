@@ -1,13 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from 'recharts';
 import { AlertTriangle, Users, CalendarCheck, TrendingUp, X, Download, Share2, Copy } from 'lucide-react';
 import { shareWhatsApp, copyToClipboard } from '../utils/whatsapp';
 import { getDepartmentColor } from '../utils/colors';
+import PdfHeaderConfig from '../components/PdfHeaderConfig';
 
 export default function Dashboard() {
-  const { employees, absences, absenceTypes, departments, alerts, darkMode, addNotification, admin, dismissAllAlerts } = useApp();
+  const { employees, absences, absenceTypes, departments, alerts, darkMode, addNotification, admin, organization, pdfDefaults, dismissAllAlerts } = useApp();
   const currentYear = new Date().getFullYear();
+  const [localHeader, setLocalHeader] = useState('');
+  const [localSubtitle, setLocalSubtitle] = useState('');
 
   const activeAlerts = alerts.filter(a => !a.resolved);
 
@@ -57,7 +60,10 @@ export default function Dashboard() {
   }, [absences, currentYear]);
 
   const handleExportChart = (chartName: string, data: unknown[]) => {
-    const text = `${chartName}\n${JSON.stringify(data, null, 2)}`;
+    const header = localHeader || pdfDefaults.header || chartName;
+    const subtitle = localSubtitle || pdfDefaults.subtitle || `Relatório ${currentYear}`;
+    
+    const text = `${header}\n${subtitle}\n\n${organization.name ? `Organização: ${organization.name}${organization.nif ? ` — NIF: ${organization.nif}` : ''}\n\n` : ''}${chartName}\n${JSON.stringify(data, null, 2)}\n\nResponsável: ${admin.name}\nData: ${new Date().toLocaleDateString('pt-PT')}`;
     const blob = new Blob([text], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -101,6 +107,16 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* PDF Header Config */}
+      <div className="flex justify-end">
+        <PdfHeaderConfig
+          localHeader={localHeader}
+          localSubtitle={localSubtitle}
+          onHeaderChange={setLocalHeader}
+          onSubtitleChange={setLocalSubtitle}
+        />
+      </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

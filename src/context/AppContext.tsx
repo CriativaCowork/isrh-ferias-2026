@@ -60,6 +60,16 @@ export interface AdminProfile {
   institution: string;
 }
 
+export interface OrganizationInfo {
+  name: string;
+  nif: string;
+}
+
+export interface PDFDefaults {
+  header: string;
+  subtitle: string;
+}
+
 export interface Notification {
   id: string;
   message: string;
@@ -75,6 +85,8 @@ interface AppState {
   absences: Absence[];
   alerts: ComplianceAlert[];
   admin: AdminProfile;
+  organization: OrganizationInfo;
+  pdfDefaults: PDFDefaults;
   notifications: Notification[];
   darkMode: boolean;
   currentPage: string;
@@ -106,6 +118,8 @@ interface AppContextType extends AppState {
   dismissAllAlerts: () => void;
   // Admin
   updateAdmin: (admin: Partial<AdminProfile>) => void;
+  updateOrganization: (org: Partial<OrganizationInfo>) => void;
+  updatePDFDefaults: (pdf: Partial<PDFDefaults>) => void;
   // UI
   toggleDarkMode: () => void;
   setCurrentPage: (page: string) => void;
@@ -207,6 +221,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [absences, setAbsences] = useState<Absence[]>(() => loadState('absences', defaultAbsences));
   const [alerts, setAlerts] = useState<ComplianceAlert[]>(() => loadState('alerts', defaultAlerts));
   const [admin, setAdmin] = useState<AdminProfile>(() => loadState('admin', { name: 'Administrador', role: 'Admin', institution: 'Empresa S.A.' }));
+  const [organization, setOrganization] = useState<OrganizationInfo>(() => loadState('organization', { name: '', nif: '' }));
+  const [pdfDefaults, setPdfDefaults] = useState<PDFDefaults>(() => loadState('pdfDefaults', { header: '', subtitle: '' }));
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [darkMode, setDarkMode] = useState<boolean>(() => loadState('darkMode', false));
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -219,6 +235,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => { saveState('absences', absences); }, [absences]);
   useEffect(() => { saveState('alerts', alerts); }, [alerts]);
   useEffect(() => { saveState('admin', admin); }, [admin]);
+  useEffect(() => { saveState('organization', organization); }, [organization]);
+  useEffect(() => { saveState('pdfDefaults', pdfDefaults); }, [pdfDefaults]);
   useEffect(() => { saveState('darkMode', darkMode); }, [darkMode]);
 
   // Auto-remove notifications after 4s
@@ -255,6 +273,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const dismissAllAlerts = () => setAlerts(prev => prev.map(a => ({ ...a, resolved: true })));
 
   const updateAdmin = (data: Partial<AdminProfile>) => setAdmin(prev => ({ ...prev, ...data }));
+  const updateOrganization = (data: Partial<OrganizationInfo>) => setOrganization(prev => ({ ...prev, ...data }));
+  const updatePDFDefaults = (data: Partial<PDFDefaults>) => setPdfDefaults(prev => ({ ...prev, ...data }));
   const toggleDarkMode = () => setDarkMode(prev => !prev);
 
   const addNotification = (message: string, type: Notification['type']) => {
@@ -278,7 +298,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={{
-      departments, positions, employees, absenceTypes, absences, alerts, admin, notifications,
+      departments, positions, employees, absenceTypes, absences, alerts, admin, organization, pdfDefaults, notifications,
       darkMode, currentPage,
       addDepartment, updateDepartment, deleteDepartment,
       addPosition, updatePosition, deletePosition,
@@ -286,7 +306,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       addAbsenceType, updateAbsenceType, deleteAbsenceType,
       addAbsence, updateAbsence, deleteAbsence,
       resolveAlert, dismissAllAlerts,
-      updateAdmin, toggleDarkMode, setCurrentPage,
+      updateAdmin, updateOrganization, updatePDFDefaults, toggleDarkMode, setCurrentPage,
       addNotification, removeNotification,
       resetAllData,
     }}>
